@@ -1,7 +1,7 @@
 # API Activitat 4 – JDM Cars
 
 ## 🌐 Enllaç al projecte desplegat a Vercel
-[https://activitat4-api.vercel.app](https://activitat4-api.vercel.app)
+[https://vercel.com/m6api/a2](https://a2-omega-lime.vercel.app/)
 
 ---
 
