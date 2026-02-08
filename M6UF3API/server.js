@@ -2,22 +2,22 @@ require('dotenv').config();
 
 const express = require('express');
 const mongoose = require('mongoose');
+
 const app = express();
-const port = process.env.PORT || 3021;
 
 // Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Conexión a MongoDB
+// Conexión MongoDB
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ Connected to MongoDB'))
   .catch(err => console.error('❌ MongoDB error:', err));
 
-// Modelo de datos para colección "cars"
+// Modelo
 const carSchema = new mongoose.Schema({
   any: Number,
-  dataAlta: { type: Date, default: Date.now },
+  dataAlta: String,
   marca: String,
   model: String,
   moneda: String,
@@ -27,86 +27,40 @@ const carSchema = new mongoose.Schema({
   traccio: String
 });
 
-const Car = mongoose.model('Car', carSchema, 'cars'); // El tercer parámetro fuerza usar la colección "cars"
+const Car = mongoose.model('Car', carSchema, 'cars');
 
-// ---------- RUTAS ---------- //
-
-// Test rápido
+// 👉 RUTA RAÍZ (MUY IMPORTANTE)
 app.get('/', (req, res) => {
-  res.send('API REST funcionando 🚀');
+  res.send('API Activitat 4 funcionant 🚀');
 });
 
-// 1️⃣ Listar todos los coches
+// LIST
 app.get('/list', async (req, res) => {
-  try {
-    const cars = await Car.find();
-    res.status(200).json(cars);
-  } catch (err) {
-    res.status(500).json({ message: 'Error fetching cars', error: err.message });
-  }
+  const cars = await Car.find();
+  res.json(cars);
 });
 
-// 2️⃣ Añadir un coche
+// ADD
 app.post('/add', async (req, res) => {
-  try {
-    const carData = req.body;
-
-    // Convierte dataAlta a Date si viene como string
-    if (carData.dataAlta) carData.dataAlta = new Date(carData.dataAlta);
-
-    const car = new Car(carData);
-    await car.save();
-    res.status(201).json(car);
-  } catch (err) {
-    res.status(400).json({ message: 'Error adding car', error: err.message });
-  }
+  const car = new Car(req.body);
+  await car.save();
+  res.json({ message: 'Car afegit correctament' });
 });
 
-// 3️⃣ Listar coches por rango de fechas (dataAlta)
-app.get('/list/:dataini/:datafi', async (req, res) => {
-  const { dataini, datafi } = req.params;
-  try {
-    const start = new Date(dataini);
-    const end = new Date(datafi);
-
-    const cars = await Car.find({
-      dataAlta: { $gte: start, $lte: end }
-    });
-
-    res.status(200).json(cars);
-  } catch (err) {
-    res.status(500).json({ message: 'Error fetching cars by date', error: err.message });
-  }
-});
-
-// 4️⃣ Actualizar coche por ID
+// UPDATE
 app.put('/update/:id', async (req, res) => {
-  const { id } = req.params;
-  const carData = req.body;
-
-  // Convierte dataAlta a Date si viene
-  if (carData.dataAlta) carData.dataAlta = new Date(carData.dataAlta);
-
-  try {
-    const car = await Car.findByIdAndUpdate(id, carData, { new: true });
-    if (!car) return res.status(404).json({ message: 'Car not found' });
-    res.status(200).json(car);
-  } catch (err) {
-    res.status(400).json({ message: 'Error updating car', error: err.message });
-  }
+  await Car.findByIdAndUpdate(req.params.id, req.body);
+  res.json({ message: 'Car actualitzat correctament' });
 });
 
-// 5️⃣ Eliminar coche por ID
+// DELETE
 app.delete('/delete/:id', async (req, res) => {
-  const { id } = req.params;
-  try {
-    const car = await Car.findByIdAndDelete(id);
-    if (!car) return res.status(404).json({ message: 'Car not found' });
-    res.status(200).json({ message: 'Car deleted successfully' });
-  } catch (err) {
-    res.status(500).json({ message: 'Error deleting car', error: err.message });
-  }
+  await Car.findByIdAndDelete(req.params.id);
+  res.json({ message: 'Car eliminat correctament' });
 });
+
+// 👇 ESTO ES LO CLAVE PARA VERCEL
+module.exports = app;
 
 // Inicia el servidor
 app.listen(port, () => {
