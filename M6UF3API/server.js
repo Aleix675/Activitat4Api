@@ -61,8 +61,3 @@ app.delete('/delete/:id', async (req, res) => {
 
 // 👇 ESTO ES LO CLAVE PARA VERCEL
 module.exports = app;
-
-// Inicia el servidor
-app.listen(port, () => {
-  console.log(`🚀 Server running on http://localhost:${port}`);
-});
